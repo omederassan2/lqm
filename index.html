@@ -3,209 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام سندات القبض</title>
+    <title>بحث المواد</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             padding: 20px;
-            background-color: #f0f4f8;
-            color: #333;
+            background-color: #f5f5f5;
         }
-
+        
         .container {
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 800px;
+            margin: 0 auto;
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
-        h2 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
+        
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
             margin-bottom: 20px;
         }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        select, input {
+        
+        input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #bdc3c7;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 16px;
-            margin-top: 8px;
             box-sizing: border-box;
         }
-
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
         button {
-            background-color: #27ae60;
-            color: white;
             padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            transition: background 0.3s;
-            margin-top: 10px;
+            transition: background-color 0.3s;
         }
-
+        
         button:hover {
-            background-color: #219a52;
+            background-color: #45a049;
         }
-
-        #message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: bold;
-            min-height: 24px;
+        
+        #cameraPreview {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+            border-radius: 8px;
         }
-
-        .loading {
-            color: #7f8c8d;
-            font-style: italic;
-        }
-
-        .error {
-            color: #e74c3c;
-        }
-
-        .success {
-            color: #27ae60;
-        }
-
-        .info {
-            color: #3498db;
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>سند قبض - بشتيوان: <span id="todayDay"></span></h2>
-     
-        <div class="form-group">
-            <label for="note">ملاحظة :</label>
-            <input type="text" id="note" placeholder="ملاحظة">
-        </div>
+        <h1 style="text-align: center;">بحث في المواد</h1>
         
-        <div class="form-group">
-            <label for="clientSelect">اسم العميل:</label>
-            <select id="clientSelect">
-                <option value="">جارٍ تحميل العملاء...</option>
-            </select>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="أدخل كود المادة أو الباركود...">
+            <div class="buttons">
+                <button onclick="searchProduct()">بحث</button>
+                <button onclick="startBarcodeScanner()">📷 مسح الباركود</button>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="usd">قبض دولار ($):</label>
-            <input type="number" id="usd" placeholder="المبلغ بالدولار">
-        </div>
-        
-        <div class="form-group">
-            <label for="iqd">قبض دينار (IQD):</label>
-            <input type="number" id="iqd" placeholder="المبلغ بالدينار">
-        </div>
-        
-        <div class="form-group">
-            <label for="exchangeRate">سعر الصرف:</label>
-            <input type="number" id="exchangeRate" placeholder="سعر الدولار مقابل الدينار">
-        </div>
-        
-        <button onclick="validateAndSubmit()">تسجيل السند</button>
-        <div id="message"></div>
+
+        <div id="cameraContainer"></div>
+        <div class="result" id="result"></div>
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7xBOiCJRkH2D_D9cOPBp0Wf5YF-n4rYhwdjthXJod3mqxYQOkpqKipT6JoXHZr0K8/exec';
-        const daysArabic = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaxB_62OThGlIlE9xcU8cceMAH0bnZptw4_gRkwpM2jXVvj_nNxo4DsOCL_qkRm_QO/exec';
+        let stream = null;
 
-        document.getElementById('todayDay').textContent = daysArabic[new Date().getDay()];
-
-        async function loadClients() {
+        async function fetchProductData(code) {
             try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getClients`);
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?code=${code}`);
                 const data = await response.json();
-                
-                const select = document.getElementById('clientSelect');
-                select.innerHTML = '<option value="">اختر عميل اليوم...</option>';
-                
-                data.forEach(client => {
-                    const option = document.createElement('option');
-                    option.value = client.name;
-                    option.textContent = client.name;
-                    select.appendChild(option);
-                });
+                return data;
             } catch (error) {
-                console.error('Error loading clients:', error);
-                showMessage('فشل في تحميل العملاء', 'error');
+                console.error('Error:', error);
+                return null;
             }
         }
 
-        async function validateAndSubmit() {
-            const client = document.getElementById('clientSelect').value;
-            const note = document.getElementById('note').value;
-            const usd = document.getElementById('usd').value;
-            const iqd = document.getElementById('iqd').value;
-            const exchangeRate = document.getElementById('exchangeRate').value;
-
-            // التحقق من أن أحد الحقلين (note أو client) يحتوي على قيمة
-            if (!note.trim() && !client.trim()) {
-                showMessage('الرجاء إدخال ملاحظة أو اسم العميل على الأقل', 'error');
+        async function searchProduct() {
+            const code = document.getElementById('searchInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!code) {
+                resultDiv.innerHTML = '<p style="color: red;">الرجاء إدخال كود المادة أو الباركود</p>';
                 return;
             }
 
-            const formData = {
-                client: client || 'غير محدد',
-                note: note || 'غير محدد',
-                usd: usd || 'غير محدد',
-                iqd: iqd || 'غير محدد',
-                exchangeRate: exchangeRate || 'غير محدد',
-            };
-
-            try {
-                showMessage('جارٍ إرسال البيانات...', 'loading');
-
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData),
-                    mode: 'no-cors',
-                });
-
-                showMessage('تم الإرسال', 'success');
-                resetForm();
-            } catch (error) {
-                console.error('Error:', error);
+            const product = await fetchProductData(code);
+            
+            if (product && product.status === 'success') {
+                resultDiv.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <p>سعر الجملة: ${product.wholesale}</p>
+                    <p>سعر المفرد: ${product.retail}</p>
+                `;
+            } else {
+                resultDiv.innerHTML = '<p style="color: red;">لم يتم العثور على المادة</p>';
             }
         }
 
-        function resetForm() {
-            document.getElementById('clientSelect').value = '';
-            document.getElementById('usd').value = '';
-            document.getElementById('iqd').value = '';
-            document.getElementById('exchangeRate').value = '';
-            document.getElementById('note').value = '';
+        async function startBarcodeScanner() {
+            const cameraContainer = document.getElementById('cameraContainer');
+            cameraContainer.innerHTML = '<video id="cameraPreview" autoplay playsinline></video>';
+            
+            const video = document.getElementById('cameraPreview');
+            
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                
+                const barcodeDetector = new BarcodeDetector({ formats: ['ean_13', 'code_128', 'qr_code'] });
+                
+                const scanInterval = setInterval(async () => {
+                    try {
+                        const barcodes = await barcodeDetector.detect(video);
+                        if (barcodes.length > 0) {
+                            const barcode = barcodes[0].rawValue;
+                            document.getElementById('searchInput').value = barcode;
+                            stopCamera();
+                            clearInterval(scanInterval);
+                            searchProduct();
+                        }
+                    } catch (err) {
+                        console.log('Error scanning barcode:', err);
+                    }
+                }, 500);
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                cameraContainer.innerHTML = '<p style="color: red;">تعذر الوصول إلى الكاميرا</p>';
+            }
         }
 
-        function showMessage(text, type) {
-            const msgDiv = document.getElementById('message');
-            msgDiv.textContent = text;
-            msgDiv.className = type;
-            setTimeout(() => msgDiv.textContent = '', 5000);
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                document.getElementById('cameraContainer').innerHTML = '';
+            }
         }
-
-        window.onload = loadClients;
     </script>
 </body>
 </html>
