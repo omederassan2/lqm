@@ -43,10 +43,14 @@
     select, input {
       width: 100%;
       padding: 10px;
-      border: 2px solid #b7b1ff;
+      border: 2px solid #ccc;
       border-radius: 8px;
-      font-size: 20px;
+      font-size: 14px;
       box-sizing: border-box;
+    }
+
+    input[readonly] {
+      background-color: #eee;
     }
 
     button {
@@ -101,11 +105,11 @@
     }
 
     .amount-box {
-      background-color: #c5c6ff;
+      background-color: #9c91ff;
       padding: 10px 20px;
       border-radius: 8px;
       font-weight: bold;
-      color: #290d0d;
+      color: #030000;
       font-size: 24px;
       flex-grow: 1;
       text-align: center;
@@ -124,9 +128,9 @@
 
     <div class="amount-container">
       <select id="amountSelect">
-        <option value="E4" selected>مووچەکەت</option>
-        <option value="H4">فرۆشتن</option>
-        <option value="I2">پارەی کۆکراوە</option>
+        <option value="E2" selected>مووچەکەت</option>
+        <option value="H2">فرۆشتن</option>
+        <option value="I4">پارەی کۆکراوە</option>
       </select>
       <div id="amountValues" class="amount-box">جارٍ التحميل...</div>
     </div>
@@ -143,17 +147,17 @@
 
     <div class="form-group">
       <label for="usd">قبض دولار ($):</label>
-      <input type="number" id="usd" placeholder="المبلغ بالدولار">
+      <input type="tel" id="usd" placeholder="المبلغ بالدولار" step="0.01" min="0" pattern="[0-9]*" inputmode="decimal" />
     </div>
 
     <div class="form-group">
       <label for="iqd">قبض دينار (IQD):</label>
-      <input type="number" id="iqd" placeholder="المبلغ بالدينار">
+      <input type="tel" id="iqd" placeholder="المبلغ بالدينار" step="1" min="0" pattern="[0-9]*" inputmode="numeric" />
     </div>
 
     <div class="form-group">
       <label for="exchangeRate">سعر الصرف:</label>
-      <input type="number" id="exchangeRate" placeholder="سعر الدولار مقابل الدينار">
+      <input type="number" id="exchangeRate" placeholder="سعر الدولار مقابل الدينار" readonly>
     </div>
 
     <button id="submitBtn" onclick="validateAndSubmit()">تۆمارکردنی پسوڵەکە</button>
@@ -169,6 +173,9 @@
   <script>
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyM1qsJX9JzCwl4aqcUFds7av3A69Kjne6wa1oW2ABneB2H5iBV-HNn58gnjs_jxj53/exec';
     const EXTERNAL_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwe3LNxv03ZGn9Cj3mr7iq4facjiR2AD4iy_vNNQWgZQ1sgSMSBkPGYJOtw-M0zPgw_ug/exec';
+    const EXCHANGE_RATE_URL = 'https://script.google.com/macros/s/AKfycbzAvk87pUPqPzrnlcyXk7VfaT5Kk4pzeW2M-SD-2XxVhudmNG8vRJ-IgK7hJt89LBif/exec';
+
+    let currentExchangeRate = 0;
 
     const daysArabic = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
     document.getElementById('todayDay').textContent = daysArabic[new Date().getDay()];
@@ -176,35 +183,27 @@
     document.getElementById('amountSelect').addEventListener('change', loadAmounts);
 
     async function loadClients() {
-  try {
-    // أولاً: نحمل سندات اليوم
-    const receiptResponse = await fetch(`${GOOGLE_SCRIPT_URL}?action=getTodayReceipts`);
-    const receiptData = await receiptResponse.json();
-    const todayClientNames = receiptData.map(entry => entry.client.split('-')[0].trim());
+      try {
+        const receiptResponse = await fetch(`${GOOGLE_SCRIPT_URL}?action=getTodayReceipts`);
+        const receiptData = await receiptResponse.json();
+        const todayClientNames = receiptData.map(entry => entry.client.split('-')[0].trim());
 
-    // بعدها: نحمل العملاء
-    const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getClients`);
-    const clientsData = await response.json();
-    const select = document.getElementById('clientSelect');
-    select.innerHTML = '<option value="">مشتەری هەڵبژێرە...</option>';
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getClients`);
+        const clientsData = await response.json();
+        const select = document.getElementById('clientSelect');
+        select.innerHTML = '<option value="">مشتەری هەڵبژێرە...</option>';
 
-    clientsData.forEach(client => {
-      const nameOnly = client.name.split('-')[0].trim();
-      const option = document.createElement('option');
-      option.value = client.name;
-
-      if (todayClientNames.includes(nameOnly)) {
-        option.textContent = `✅ ${client.name}`;
-      } else {
-        option.textContent = client.name;
+        clientsData.forEach(client => {
+          const nameOnly = client.name.split('-')[0].trim();
+          const option = document.createElement('option');
+          option.value = client.name;
+          option.textContent = todayClientNames.includes(nameOnly) ? '✅ ' + client.name : client.name;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        showMessage('فشل في تحميل العملاء أو سندات اليوم', 'error');
       }
-
-      select.appendChild(option);
-    });
-  } catch (error) {
-    showMessage('فشل في تحميل العملاء أو سندات اليوم', 'error');
-  }
-}
+    }
 
     async function loadTodayReceipts() {
       try {
@@ -239,59 +238,82 @@
       }
     }
 
-    async function validateAndSubmit() {
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'جارٍ الإرسال...';
+    async function loadExchangeRate() {
+      try {
+        const response = await fetch(EXCHANGE_RATE_URL);
+        const data = await response.json();
+        currentExchangeRate = parseFloat(data.rate);
+        document.getElementById('exchangeRate').value = currentExchangeRate;
+      } catch (error) {
+        showMessage('فشل في تحميل سعر الصرف', 'error');
+      }
+    }
 
-  let clientRaw = document.getElementById('clientSelect').value || '';
-  let client = clientRaw.includes('-') ? clientRaw.split('-')[0].trim() : clientRaw.trim();
-
-  const note = document.getElementById('note').value;
-  const usd = document.getElementById('usd').value;
-  const iqd = document.getElementById('iqd').value;
-  const exchangeRate = document.getElementById('exchangeRate').value;
-
-  if (!note.trim() && !client.trim()) {
-    showMessage('تکایە بەلایەنی کەمەوە تێبینییەک یان ناوی کڕیارێک بنووسە.', 'error');
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'تۆمارکردنی پسوڵەکە';
-    return;
-  }
-
-  const formData = {
-    client: client || 'غير محدد',
-    note: note || 'غير محدد',
-    usd: usd || '0',
-    iqd: iqd || '0',
-    exchangeRate: exchangeRate || '0',
-  };
-
-  try {
-    showMessage('جارٍ إرسال البيانات...', 'loading');
-    await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-      mode: 'no-cors',
+    document.getElementById('usd').addEventListener('input', function () {
+      const usd = parseFloat(this.value);
+      if (!isNaN(usd) && currentExchangeRate > 0) {
+        document.getElementById('iqd').value = Math.round(usd * currentExchangeRate);
+      }
     });
-    showMessage('پسوڵەکە بە سەرکەوتوویی تۆمار کراوە.', 'success');
-    resetForm();
-    loadTodayReceipts();
-  } catch (error) {
-    showMessage('فشل في الإرسال', 'error');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'تۆمارکردنی پسوڵەکە';
-  }
-}
 
+    document.getElementById('iqd').addEventListener('input', function () {
+      const iqd = parseFloat(this.value);
+      if (!isNaN(iqd) && currentExchangeRate > 0) {
+        document.getElementById('usd').value = (iqd / currentExchangeRate).toFixed(2);
+      }
+    });
+
+    async function validateAndSubmit() {
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جارٍ الإرسال...';
+
+      let clientFull = document.getElementById('clientSelect').value;
+      let client = clientFull.split('-')[0].trim();
+      const note = document.getElementById('note').value;
+      const usd = document.getElementById('usd').value;
+      const iqd = document.getElementById('iqd').value;
+      const exchangeRate = document.getElementById('exchangeRate').value;
+
+      if (!note.trim() && !client.trim()) {
+        showMessage('تکایە بەلایەنی کەمەوە تێبینییەک یان ناوی کڕیارێک بنووسە.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'تۆمارکردنی پسوڵەکە';
+        return;
+      }
+
+      const formData = {
+        client: client || 'غير محدد',
+        note: note || 'غير محدد',
+        usd: usd || '0',
+        iqd: iqd || '0',
+        exchangeRate: exchangeRate || '0',
+      };
+
+      try {
+        showMessage('جارٍ إرسال البيانات...', 'loading');
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+          mode: 'no-cors',
+        });
+        showMessage('پسوڵەکە بە سەرکەوتوویی تۆمار کراوە.', 'success');
+        resetForm();
+        loadTodayReceipts();
+        loadClients();
+      } catch (error) {
+        showMessage('فشل في الإرسال', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'تۆمارکردنی پسوڵەکە';
+      }
+    }
 
     function resetForm() {
       document.getElementById('clientSelect').value = '';
       document.getElementById('usd').value = '';
       document.getElementById('iqd').value = '';
-      document.getElementById('exchangeRate').value = '';
       document.getElementById('note').value = '';
     }
 
@@ -303,9 +325,10 @@
     }
 
     window.onload = () => {
-      loadClients();
       loadTodayReceipts();
+      loadClients();
       loadAmounts();
+      loadExchangeRate();
     };
   </script>
 </body>
