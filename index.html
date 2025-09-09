@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="نظام إدارة سندات القبض لشركة بشتيوان">
+  <meta name="description" content="نظام إدارة سندات القبض لشركة لقمان">
   <title>نظام سندات القبض - لقمان</title>
   <style>
     :root {
@@ -264,7 +264,6 @@
       googleScriptUrl: 'https://script.google.com/macros/s/AKfycbyMQJOhNI-NVUJ2S6tO91FrTgdxCAWs1hL02_H2lBm8MWpeoo0S6UbordkwotBjWjRU/exec',
       externalSheetUrl: 'https://script.google.com/macros/s/AKfycbyu5oqMKOAKXK05bYG9pSWhc6HQ1nj5t6eI75AhW7urb0ldyH3H1CFcwFxu9Y637wt2rg/exec',
       exchangeRateUrl: 'https://script.google.com/macros/s/AKfycbzAvk87pUPqPzrnlcyXk7VfaT5Kk4pzeW2M-SD-2XxVhudmNG8vRJ-IgK7hJt89LBif/exec',
-      locationSheetUrl: 'https://script.google.com/macros/s/AKfycbzONE5_UG61J1zVzkfraNGtLSu6ZprBCVOof9GpVG3K7YP6bE9t51zxL7xF9clHcELE/exec',
       daysArabic: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
     };
 
@@ -480,32 +479,6 @@
         submitBtn.disabled = false;
         submitBtn.textContent = 'تۆمارکردنی پسوڵەکە';
       }
-      // إرسال بيانات الموقع إلى شيت آخر
-if (client) {
-  try {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const locationData = {
-        client: client,
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        timestamp: new Date().toISOString()
-      };
-
-      await fetch(CONFIG.locationSheetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(locationData),
-        mode: 'no-cors',
-      });
-
-      console.log("✅ تم إرسال الموقع الجغرافي بنجاح");
-    }, (error) => {
-      console.warn("⚠️ تعذر الحصول على الموقع:", error.message);
-    });
-  } catch (locErr) {
-    console.error("📍 خطأ في إرسال الموقع:", locErr);
-  }
-}
     }
 
     function resetForm() {
