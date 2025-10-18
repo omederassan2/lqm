@@ -220,6 +220,38 @@
       flex-grow: 1;
       text-align: center;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60px;
+    }
+
+    .amount-box.hidden {
+      color: transparent;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .toggle-amount-btn {
+      position: absolute;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.3);
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .toggle-amount-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: scale(1.1);
     }
 
     #amountSelect {
@@ -444,7 +476,10 @@
         <option value="H2">فرۆشتن</option>
         <option value="I4">پارەی کۆکراوە</option>
       </select>
-      <div id="amountValues" class="amount-box">چاوەڕێ بکە ...</div>
+      <div id="amountValues" class="amount-box">
+        <button class="toggle-amount-btn" id="toggleAmountBtn" title="إخفاء/إظهار الراتب">👁️</button>
+        <span id="amountText">چاوەڕێ بکە ...</span>
+      </div>
     </div>
 
     <div class="form-group">
@@ -510,6 +545,7 @@
     // متغيرات لتخزين أسعار الصرف
     let previousExchangeRate = null;
     let currentExchangeRate = null;
+    let isAmountHidden = false; // حالة إخفاء الراتب
 
     // تهيئة الصفحة عند التحميل
     document.addEventListener('DOMContentLoaded', () => {
@@ -555,6 +591,9 @@
       
       // إضافة مستمع للنافذة المنبثقة
       document.getElementById('alertOkButton').addEventListener('click', hideExchangeRateAlert);
+      
+      // إضافة مستمع لزر إخفاء/إظهار الراتب
+      document.getElementById('toggleAmountBtn').addEventListener('click', toggleAmountVisibility);
     }
 
     // تحميل البيانات الأولية
@@ -640,7 +679,7 @@
     // تحميل المبالغ
     async function loadAmounts() {
       const range = document.getElementById('amountSelect').value;
-      const container = document.getElementById('amountValues');
+      const container = document.getElementById('amountText');
       
       container.textContent = 'جاري التحميل...';
       
@@ -655,6 +694,11 @@
         });
         
         container.textContent = formatted;
+        
+        // تحديث حالة الإخفاء إذا كان مخفيًا
+        if (isAmountHidden) {
+          toggleAmountVisibility();
+        }
       } catch (error) {
         container.textContent = 'خطأ في التحميل';
         console.error('Error loading amounts:', error);
@@ -825,6 +869,24 @@
           msgElement.textContent = '';
           msgElement.className = '';
         }, 5000);
+      }
+    }
+
+    // وظيفة إخفاء/إظهار الراتب
+    function toggleAmountVisibility() {
+      const amountBox = document.getElementById('amountValues');
+      const toggleBtn = document.getElementById('toggleAmountBtn');
+      
+      isAmountHidden = !isAmountHidden;
+      
+      if (isAmountHidden) {
+        amountBox.classList.add('hidden');
+        toggleBtn.innerHTML = '👁️‍🗨️';
+        toggleBtn.title = 'إظهار الراتب';
+      } else {
+        amountBox.classList.remove('hidden');
+        toggleBtn.innerHTML = '👁️';
+        toggleBtn.title = 'إخفاء الراتب';
       }
     }
 
