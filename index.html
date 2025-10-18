@@ -7,8 +7,8 @@
   <title>نظام سندات القبض - لقمان</title>
   <style>
     :root {
-      --primary-color: #27ae60;
-      --primary-hover: #219a52;
+      --primary-color: #3e72ff;
+      --primary-hover: #3e72ff;
       --secondary-color: #2c3e50;
       --error-color: #e74c3c;
       --success-color: #27ae60;
@@ -233,26 +233,25 @@
     }
 
     .toggle-amount-btn {
-      position: absolute;
-      left: 1px;
-      background: rgba(255, 255, 255, 0.3);
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: var(--transition);
-      color: #fff;
-      font-size: 0.9rem;
-    }
+  background: var(--primary-color);
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
 
-    .toggle-amount-btn:hover {
-      background: rgba(255, 255, 255, 0.5);
-      transform: scale(1.1);
-    }
+.toggle-amount-btn:hover {
+  background: var(--primary-hover);
+  transform: scale(1.1);
+}
 
     #amountSelect {
       width: 150px;
@@ -471,16 +470,19 @@
     </div>
 
     <div class="amount-container">
-      <select id="amountSelect">
-        <option value="E2" selected>مووچەکەت</option>
-        <option value="H2">فرۆشتن</option>
-        <option value="I4">پارەی کۆکراوە</option>
-      </select>
-      <div id="amountValues" class="amount-box">
-        <button class="toggle-amount-btn" id="toggleAmountBtn" title="إخفاء/إظهار الراتب">👁️</button>
-        <span id="amountText">چاوەڕێ بکە ...</span>
-      </div>
+  <select id="amountSelect">
+    <option value="E2" selected>مووچەکەت</option>
+    <option value="H2">فرۆشتن</option>
+    <option value="I4">پارەی کۆکراوە</option>
+  </select>
+
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <div id="amountValues" class="amount-box">
+      <span id="amountText">چاوەڕێ بکە ...</span>
     </div>
+    <button class="toggle-amount-btn" id="toggleAmountBtn" title="إخفاء/إظهار الراتب">👁️</button>
+  </div>
+</div>
 
     <div class="form-group">
       <label for="note">تێبینی:</label>
