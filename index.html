@@ -227,32 +227,35 @@
       min-height: 60px;
     }
 
-    .amount-box.hidden {
-      color: transparent;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+    .amount-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  min-height: 60px;
+}
 
-    .toggle-amount-btn {
-      position: absolute;
-      left: 10px;
-      background: rgba(255, 255, 255, 0.3);
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: var(--transition);
-      color: #fff;
-      font-size: 0.9rem;
-    }
+.toggle-amount-btn {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: #fff;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-left: 10px; /* مسافة بين الزر والرقم */
+}
 
-    .toggle-amount-btn:hover {
-      background: rgba(255, 255, 255, 0.5);
-      transform: scale(1.1);
-    }
+#amountText {
+  flex-grow: 1;
+  text-align: center;
+}
 
     #amountSelect {
       width: 150px;
