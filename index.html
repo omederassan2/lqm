@@ -18,67 +18,91 @@
       --card-background: #fff;
       --amount-bg: #9c91ff;
       --receipts-bg: #ecf0f1;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: var(--background-light);
       padding: 10px;
       color: #333;
       line-height: 1.6;
+      min-height: 100vh;
     }
 
     .container {
       background: var(--card-background);
-      padding: 20px;
+      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow);
       max-width: 600px;
       margin: 20px auto;
+      transition: var(--transition);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
     }
 
     h2 {
-      text-align: center;
       color: var(--secondary-color);
-      margin-bottom: 20px;
-      font-size: 1.4rem;
+      margin-bottom: 5px;
+      font-size: 1.5rem;
+    }
+
+    .date-display {
+      color: #7f8c8d;
+      font-size: 0.9rem;
     }
 
     h3 {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       margin-bottom: 15px;
+      color: var(--secondary-color);
     }
 
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     label {
       display: block;
-      font-weight: bold;
-      margin-bottom: 6px;
-      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      color: var(--secondary-color);
     }
 
     select, input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border: 2px solid var(--border-color);
       border-radius: 8px;
-      font-size: 0.9rem;
-      transition: border-color 0.3s;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      background-color: #fff;
     }
 
     select:focus, input:focus {
       border-color: var(--primary-color);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
     }
 
     input[readonly] {
-      background-color: #eee;
+      background-color: #f8f9fa;
       cursor: not-allowed;
+      color: #6c757d;
     }
 
     button {
@@ -90,50 +114,85 @@
       width: 100%;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.3s;
-      font-weight: bold;
+      transition: var(--transition);
+      font-weight: 600;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
     }
 
     button:hover {
       background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
     }
 
     button:disabled {
       background: #95a5a6;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .message-container {
+      margin: 20px 0;
+      min-height: 24px;
     }
 
     #message {
       text-align: center;
-      margin: 15px 0;
-      font-weight: bold;
-      min-height: 24px;
-      font-size: 0.9rem;
-      padding: 8px;
-      border-radius: 5px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px;
+      border-radius: 8px;
+      transition: var(--transition);
     }
 
-    .success { color: var(--success-color); }
-    .error { color: var(--error-color); }
-    .loading { color: var(--loading-color); }
+    .success { 
+      background-color: rgba(39, 174, 96, 0.1); 
+      color: var(--success-color);
+      border: 1px solid rgba(39, 174, 96, 0.2);
+    }
+    
+    .error { 
+      background-color: rgba(231, 76, 60, 0.1); 
+      color: var(--error-color);
+      border: 1px solid rgba(231, 76, 60, 0.2);
+    }
+    
+    .loading { 
+      background-color: rgba(127, 140, 141, 0.1); 
+      color: var(--loading-color);
+      border: 1px solid rgba(127, 140, 141, 0.2);
+    }
 
     #todayReceipts {
-      margin-top: 25px;
+      margin-top: 30px;
       background: var(--receipts-bg);
-      padding: 15px;
+      padding: 20px;
       border-radius: 10px;
     }
 
     #receiptList {
       padding-right: 20px;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      margin-bottom: 15px;
+      max-height: 200px;
+      overflow-y: auto;
     }
 
     #receiptList li {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       list-style-type: none;
       padding-right: 15px;
       position: relative;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     #receiptList li::before {
@@ -141,125 +200,306 @@
       color: var(--primary-color);
       position: absolute;
       right: 0;
+      font-size: 1.2rem;
     }
 
     .amount-container {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
     .amount-box {
-      background-color: #9c91ff;
-      padding: 10px 20px;
+      background-color: var(--amount-bg);
+      padding: 15px 20px;
       border-radius: 8px;
       font-weight: bold;
-      color: #030000;
-      font-size: 24px;
+      color: #fff;
+      font-size: 1.3rem;
+      flex-grow: 1;
       text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     #amountSelect {
       width: 150px;
-      padding: 8px;
-      font-size: 14px;
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+
+    .total-display {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .currency-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    /* نافذة التنبيه داخل الصفحة */
+    .exchange-rate-alert {
+      background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+      border: 2px solid #ffc107;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+      display: none;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .exchange-rate-alert.active {
+      display: block;
+    }
+
+    .alert-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .alert-icon {
+      font-size: 2rem;
+    }
+
+    .alert-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #856404;
+      margin: 0;
+    }
+
+    .alert-message {
+      color: #856404;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+
+    .exchange-rate-info {
+      background: rgba(255, 255, 255, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border: 1px solid #ffeaa7;
+    }
+
+    .rate-change {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 5px 0;
+    }
+
+    .rate-change:last-child {
+      margin-bottom: 0;
+    }
+
+    .rate-label {
+      font-weight: 600;
+      color: #856404;
+    }
+
+    .rate-value {
+      font-weight: bold;
+    }
+
+    .new-rate {
+      color: #e74c3c;
+      font-size: 1.1em;
+    }
+
+    .old-rate {
+      color: #6c757d;
+      text-decoration: line-through;
+    }
+
+    .alert-button {
+      background: #ffc107;
+      color: #856404;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .alert-button:hover {
+      background: #e0a800;
+      transform: translateY(-2px);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @media (max-width: 480px) {
-  .amount-container {
-    flex-direction: row; /* اجعلها صف واحد دائمًا */
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+      .container {
+        padding: 20px 15px;
+      }
+      
+      .amount-container {
+        flex-direction: column;
+      }
+      
+      #amountSelect {
+        width: 100%;
+      }
+      
+      .currency-inputs {
+        grid-template-columns: 1fr;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
+      
+      .rate-change {
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
+      }
+      
+      .alert-header {
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
 
-  #amountSelect {
-    width: auto;
-    min-width: 120px;
-    flex-shrink: 0;
-  }
-
-  .amount-box {
-    flex-grow: 1;
-  }
-}
-
-
-    #toggleAmount {
-      position: absolute;
-      top: 5px;
-      left: 5px;
-      background: #fff;
-      border: 1px solid #ccc;
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      font-size: 14px;
-      padding: 0;
-      cursor: pointer;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>سند قبض - لقمان: <span id="todayDay"></span></h2>
+    <!-- نافذة التنبيه -->
+    <div class="exchange-rate-alert" id="exchangeRateAlert">
+      <div class="alert-header">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-title">ئاگاداری:   نرخی ئاڵوگۆڕ گۆڕا</div>
+      </div>
+      <div class="alert-message">نرخی ئاڵوگۆڕی دراو بەپێی بۆرسەی هەولێر ئێستا</div>
+      
+      <div class="exchange-rate-info">
+        <div class="rate-change">
+          <span class="rate-label">نرخی پێشوو :</span>
+          <span class="rate-value old-rate" id="oldRateValue">0</span>
+        </div>
+        <div class="rate-change">
+          <span class="rate-label">نرخی ئێستا :</span>
+          <span class="rate-value new-rate" id="newRateValue">0</span>
+        </div>
+      </div>
+      
+      <button class="alert-button" id="alertOkButton">باشە</button>
+    </div>
+
+    <div class="header">
+      <h2>کۆمپانیای ئومێدی ڕاسان - لقمان</h2>
+      <div class="date-display" id="todayDay"></div>
+    </div>
 
     <div class="amount-container">
       <select id="amountSelect">
         <option value="E2" selected>مووچەکەت</option>
         <option value="H2">فرۆشتن</option>
-        <option value="I4"> پارەی کۆکراوە</option>
+        <option value="I4">پارەی کۆکراوە</option>
       </select>
+      <div id="amountValues" class="amount-box">چاوەڕێ بکە ...</div>
+    </div>
 
-      <div style="position: relative; flex-grow: 1;">
-        <div id="amountValues" class="amount-box">جاري التحميل...</div>
-        <button id="toggleAmount">👁️</button>
+    <div class="form-group">
+      <label for="note">تێبینی:</label>
+      <input type="text" id="note" placeholder="تێبینی بنووسە">
+    </div>
+
+    <div class="form-group">
+      <label for="clientSelect">ناوی کڕیار:</label>
+      <select id="clientSelect">
+        <option value="">چاوەڕێ بکە  ...</option>
+      </select>
+    </div>
+
+    <div class="currency-inputs">
+      <div class="form-group">
+        <label for="usd">بڕی بە دۆلار  ($):</label>
+        <input type="number" id="usd" placeholder="بڕە پارەکە بە دۆلار بنووسە" step="0.01" min="0" inputmode="decimal">
+      </div>
+
+      <div class="form-group">
+        <label for="iqd"> بڕی بە دینار (IQD):</label>
+        <input type="number" id="iqd" placeholder="بڕە پارەکە بە دينار بنووس" step="1" min="0" inputmode="numeric">
       </div>
     </div>
 
     <div class="form-group">
-      <label for="note">تێبینی :</label>
-      <input type="text" id="note" placeholder=" تێبینی ">
+      <label for="exchangeRate">نرخی ئاڵوگۆڕ :</label>
+      <input type="number" id="exchangeRate" placeholder="نرخی دۆلار بەرامبەر بە دینار" readonly>
+    </div>
+
+    <button id="submitBtn">
+      <span>تۆمارکردنی پسوڵەکە</span>
+    </button>
+    
+    <div class="message-container">
+      <div id="message"></div>
     </div>
 
     <div class="form-group">
-      <label for="clientSelect"> ناوی کڕیار:</label>
-      <select id="clientSelect">
-        <option value="">جاري تحميل العملاء...</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="usd">المبلغ بالدولار ($):</label>
-      <input type="number" id="usd" placeholder="أدخل المبلغ بالدولار" step="0.01" min="0" inputmode="decimal">
-    </div>
-
-    <div class="form-group">
-      <label for="iqd">المبلغ بالدينار (IQD):</label>
-      <input type="number" id="iqd" placeholder="أدخل المبلغ بالدينار" step="1" min="0" inputmode="numeric">
-    </div>
-
-    <div class="form-group">
-      <label for="exchangeRate">سعر الصرف:</label>
-      <input type="number" id="exchangeRate" placeholder="سعر الدولار مقابل الدينار" readonly>
-    </div>
-
-    <button id="submitBtn">تۆمارکردنی پسوڵەکە</button>
-    <div id="message"></div>
-
-    <div class="form-group">
-      <label for="daySelect"> ڕۆژێک هەڵبژێرە:</label>
+      <label for="daySelect">ڕۆژێک هەڵبژێرە:</label>
       <select id="daySelect"></select>
     </div>
 
-    <div id="todayReceipts">
+    <div id="todayReceipts" class="fade-in">
       <h3>پسوڵەی ئەمڕۆ:</h3>
       <ul id="receiptList"></ul>
-      <p><strong> ="کۆی گشتی بە دۆلار : $<span id="totalUSD">0</span></strong></p>
+      <div class="total-display">
+        <strong>کۆی گشتی بە دۆلار: $<span id="totalUSD">0</span></strong>
+      </div>
     </div>
   </div>
 
   <script>
+    // الثوابت والتكوين
     const CONFIG = {
       googleScriptUrl: 'https://script.google.com/macros/s/AKfycbyMQJOhNI-NVUJ2S6tO91FrTgdxCAWs1hL02_H2lBm8MWpeoo0S6UbordkwotBjWjRU/exec',
       externalSheetUrl: 'https://script.google.com/macros/s/AKfycbyu5oqMKOAKXK05bYG9pSWhc6HQ1nj5t6eI75AhW7urb0ldyH3H1CFcwFxu9Y637wt2rg/exec',
@@ -267,21 +507,31 @@
       daysArabic: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
     };
 
+    // متغيرات لتخزين أسعار الصرف
+    let previousExchangeRate = null;
+    let currentExchangeRate = null;
+
+    // تهيئة الصفحة عند التحميل
     document.addEventListener('DOMContentLoaded', () => {
       initPage();
       setupEventListeners();
     });
 
+    // تهيئة عناصر الصفحة
     function initPage() {
       const today = new Date();
       const todayIndex = today.getDay();
+      
       document.getElementById('todayDay').textContent = CONFIG.daysArabic[todayIndex];
       populateDaySelect(todayIndex);
+      
       loadInitialData();
     }
 
+    // تعبئة قائمة الأيام
     function populateDaySelect(selectedIndex) {
       const daySelect = document.getElementById('daySelect');
+      
       CONFIG.daysArabic.forEach((day, index) => {
         const option = document.createElement('option');
         option.value = day;
@@ -291,6 +541,7 @@
       });
     }
 
+    // إعداد مستمعي الأحداث
     function setupEventListeners() {
       document.getElementById('daySelect').addEventListener('change', () => {
         loadClients(document.getElementById('daySelect').value);
@@ -298,24 +549,15 @@
 
       document.getElementById('amountSelect').addEventListener('change', loadAmounts);
       document.getElementById('submitBtn').addEventListener('click', validateAndSubmit);
+      
       document.getElementById('usd').addEventListener('input', convertUsdToIqd);
       document.getElementById('iqd').addEventListener('input', convertIqdToUsd);
-
-      // ✅ كود الإخفاء/الإظهار
-      document.getElementById('toggleAmount').addEventListener('click', () => {
-        const amountBox = document.getElementById('amountValues');
-        const toggleBtn = document.getElementById('toggleAmount');
-
-        if (amountBox.style.visibility === 'hidden') {
-          amountBox.style.visibility = 'visible';
-          toggleBtn.textContent = '👁️';
-        } else {
-          amountBox.style.visibility = 'hidden';
-          toggleBtn.textContent = '🚫';
-        }
-      });
+      
+      // إضافة مستمع للنافذة المنبثقة
+      document.getElementById('alertOkButton').addEventListener('click', hideExchangeRateAlert);
     }
 
+    // تحميل البيانات الأولية
     async function loadInitialData() {
       try {
         await Promise.all([
@@ -330,6 +572,7 @@
       }
     }
 
+    // تحميل العملاء
     async function loadClients(selectedDay) {
       try {
         const [receiptResponse, clientsResponse] = await Promise.all([
@@ -344,8 +587,9 @@
 
         const todayClientNames = receiptData.map(entry => entry.client.split('-')[0].trim());
         const clientSelect = document.getElementById('clientSelect');
+        
         clientSelect.innerHTML = '<option value=""> مشتەری هەڵبژێرە...</option>';
-
+        
         clientsData.forEach(client => {
           const nameOnly = client.name.split('-')[0].trim();
           const option = document.createElement('option');
@@ -359,41 +603,57 @@
       }
     }
 
+    // تحميل سندات اليوم
     async function loadTodayReceipts() {
       try {
         const response = await fetch(`${CONFIG.googleScriptUrl}?action=getTodayReceipts`);
         const data = await response.json();
         const list = document.getElementById('receiptList');
+        
         list.innerHTML = '';
         let total = 0;
-
-        data.forEach(entry => {
+        
+        if (data.length === 0) {
           const li = document.createElement('li');
-          li.textContent = `${entry.client} - $${entry.usd}`;
-          total += parseFloat(entry.usd || 0);
+          li.textContent = 'هیچ پسوڵەیەک نیە';
+          li.style.color = '#7f8c8d';
+          li.style.fontStyle = 'italic';
           list.appendChild(li);
+        } else {
+          data.forEach(entry => {
+            const li = document.createElement('li');
+            li.textContent = `${entry.client} - $${entry.usd}`;
+            total += parseFloat(entry.usd || 0);
+            list.appendChild(li);
+          });
+        }
+        
+        document.getElementById('totalUSD').textContent = total.toLocaleString('en-US', { 
+          maximumFractionDigits: 0 
         });
-
-        document.getElementById('totalUSD').textContent = total.toLocaleString('en-US', { maximumFractionDigits: 0 });
       } catch (error) {
-        showMessage('م', 'error');
+        showMessage('فشل في تحميل سندات اليوم', 'error');
         console.error('Error loading today receipts:', error);
       }
     }
 
+    // تحميل المبالغ
     async function loadAmounts() {
       const range = document.getElementById('amountSelect').value;
       const container = document.getElementById('amountValues');
+      
       container.textContent = 'جاري التحميل...';
-
+      
       try {
         const response = await fetch(`${CONFIG.externalSheetUrl}?range=${range}`);
         const data = await response.json();
-        const formatted = Number(data.value).toLocaleString('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          maximumFractionDigits: 0
+        
+        const formatted = Number(data.value).toLocaleString('en-US', { 
+          style: 'currency', 
+          currency: 'USD', 
+          maximumFractionDigits: 0 
         });
+        
         container.textContent = formatted;
       } catch (error) {
         container.textContent = 'خطأ في التحميل';
@@ -401,37 +661,98 @@
       }
     }
 
+    // تحميل سعر الصرف مع التتبع
     async function loadExchangeRate() {
       try {
+        // جلب السعر السابق من localStorage
+        const storedPreviousRate = localStorage.getItem('previousExchangeRate');
+        previousExchangeRate = storedPreviousRate ? parseFloat(storedPreviousRate) : null;
+        
+        console.log('🔍 جاري تحميل سعر الصرف...');
+        console.log('📊 السعر السابق من التخزين:', previousExchangeRate);
+        
         const response = await fetch(CONFIG.exchangeRateUrl);
         const data = await response.json();
-        document.getElementById('exchangeRate').value = parseFloat(data.rate);
+        const newRate = parseFloat(data.rate);
+        
+        console.log('📊 السعر الجديد:', newRate);
+        
+        // تحديث السعر الحالي
+        currentExchangeRate = newRate;
+        
+        // التحقق من التغير (فقط إذا كان هناك سعر سابق)
+        if (previousExchangeRate !== null && previousExchangeRate !== newRate) {
+          console.log('🚨 تغيير مكتشف! الفرق:', newRate - previousExchangeRate);
+          showExchangeRateAlert(previousExchangeRate, newRate);
+        } else if (previousExchangeRate === null) {
+          console.log('✅ أول تحميل للسعر - سيتم تخزينه');
+        } else {
+          console.log('✅ لا يوجد تغيير');
+        }
+        
+        // حفظ السعر الجديد كسعر سابق للمرة القادمة
+        localStorage.setItem('previousExchangeRate', newRate.toString());
+        previousExchangeRate = newRate;
+        
+        // تحديث العرض
+        document.getElementById('exchangeRate').value = newRate;
+        
       } catch (error) {
+        console.error('❌ خطأ في تحميل سعر الصرف:', error);
         showMessage('فشل في تحميل سعر الصرف', 'error');
-        console.error('Error loading exchange rate:', error);
       }
     }
 
+    // عرض تنبيه تغيير سعر الصرف
+    function showExchangeRateAlert(oldRate, newRate) {
+      document.getElementById('oldRateValue').textContent = formatRate(oldRate);
+      document.getElementById('newRateValue').textContent = formatRate(newRate);
+      
+      const alertElement = document.getElementById('exchangeRateAlert');
+      alertElement.classList.add('active');
+      alertElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // تنسيق عرض سعر الصرف
+    function formatRate(rate) {
+      return rate.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }) + ' دينار';
+    }
+
+    // إخفاء تنبيه تغيير سعر الصرف
+    function hideExchangeRateAlert() {
+      document.getElementById('exchangeRateAlert').classList.remove('active');
+    }
+
+    // تحويل من الدولار إلى الدينار
     function convertUsdToIqd() {
       const usd = parseFloat(this.value);
       const rate = parseFloat(document.getElementById('exchangeRate').value);
+      
       if (!isNaN(usd) && rate > 0) {
         document.getElementById('iqd').value = Math.round(usd * rate);
       }
     }
 
+    // تحويل من الدينار إلى الدولار
     function convertIqdToUsd() {
       const iqd = parseFloat(this.value);
       const rate = parseFloat(document.getElementById('exchangeRate').value);
+      
       if (!isNaN(iqd) && rate > 0) {
         document.getElementById('usd').value = (iqd / rate).toFixed(2);
       }
     }
 
+    // التحقق من البيانات وإرسالها
     async function validateAndSubmit() {
       const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.innerHTML;
+      
       submitBtn.disabled = true;
-      submitBtn.textContent = 'جاري الإرسال...';
+      submitBtn.innerHTML = '<span class="loading-spinner"></span> جاري الإرسال...';
 
       const clientFull = document.getElementById('clientSelect').value;
       const client = clientFull.split('-')[0].trim();
@@ -440,10 +761,11 @@
       const iqd = document.getElementById('iqd').value;
       const exchangeRate = document.getElementById('exchangeRate').value;
 
+      // التحقق من البيانات المطلوبة
       if (!note.trim() && !client.trim()) {
         showMessage('تکایە بەلایەنی کەمەوە تێبینییەک یان ناوی کڕیارێک بنووسە', 'error');
         submitBtn.disabled = false;
-        submitBtn.textContent = ' تۆمارکردنی پسوڵەکە';
+        submitBtn.innerHTML = originalText;
         return;
       }
 
@@ -457,17 +779,18 @@
 
       try {
         showMessage('جاري إرسال البيانات...', 'loading');
-
+        
         await fetch(CONFIG.googleScriptUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
           mode: 'no-cors',
         });
-
+        
         showMessage('پسوڵەکە بە سەرکەوتوویی تۆمار کراوە', 'success');
         resetForm();
-
+        
+        // إعادة تحميل البيانات المحدثة
         await Promise.all([
           loadTodayReceipts(),
           loadClients(document.getElementById('daySelect').value)
@@ -477,10 +800,11 @@
         console.error('Error submitting form:', error);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'تۆمارکردنی پسوڵەکە';
+        submitBtn.innerHTML = originalText;
       }
     }
 
+    // إعادة تعيين النموذج
     function resetForm() {
       document.getElementById('clientSelect').value = '';
       document.getElementById('usd').value = '';
@@ -489,10 +813,13 @@
       document.getElementById('usd').focus();
     }
 
+    // عرض الرسائل
     function showMessage(text, type) {
       const msgElement = document.getElementById('message');
       msgElement.textContent = text;
       msgElement.className = type;
+      msgElement.classList.add('fade-in');
+      
       if (type !== 'loading') {
         setTimeout(() => {
           msgElement.textContent = '';
@@ -500,6 +827,9 @@
         }, 5000);
       }
     }
+
+    // إضافة console.log للتصحيح
+    console.log('🚀 تم تحميل النظام بنجاح مع نظام التخزين المحلي');
   </script>
 </body>
 </html>
