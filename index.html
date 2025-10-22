@@ -620,7 +620,7 @@ async function loadClients(selectedDay) {
     const [receiptResponse, clientsResponse, externalResponse] = await Promise.all([
       fetch(`${CONFIG.googleScriptUrl}?action=getTodayReceipts`),
       fetch(`${CONFIG.googleScriptUrl}?action=getClients&day=${encodeURIComponent(selectedDay)}`),
-      fetch('https://script.google.com/macros/s/AKfycbxQwwhYr5ZEBEa5ug6a1YYJLgTB_OGul3smhWcf3yovHx9PhrXlqXKc3y5QP4dpGCbe/exec?action=getExternalClients') // الشيت الخارجي
+      fetch('https://script.google.com/macros/s/AKfycbxoOp3CrR1nhnvJyAt3-OP43Lm2zXi9WMY2M2EejjwhSEWZvNhbqLpreZa_E9sKqsOW/exec?action=getExternalClients') // الشيت الخارجي
     ]);
 
     const [receiptData, clientsData, externalDataRaw] = await Promise.all([
