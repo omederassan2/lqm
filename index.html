@@ -614,55 +614,35 @@
     }
 
     // تحميل العملاء
-async function loadClients(selectedDay) {
-  try {
-    // جلب سندات اليوم وبيانات العملاء من الشيت الأساسي والشيت الخارجي
-    const [receiptResponse, clientsResponse, externalResponse] = await Promise.all([
-      fetch(`${CONFIG.googleScriptUrl}?action=getTodayReceipts`),
-      fetch(`${CONFIG.googleScriptUrl}?action=getClients&day=${encodeURIComponent(selectedDay)}`),
-      fetch('https://script.google.com/macros/s/AKfycbxoOp3CrR1nhnvJyAt3-OP43Lm2zXi9WMY2M2EejjwhSEWZvNhbqLpreZa_E9sKqsOW/exec?action=getExternalClients') // الشيت الخارجي
-    ]);
+    async function loadClients(selectedDay) {
+      try {
+        const [receiptResponse, clientsResponse] = await Promise.all([
+          fetch(`${CONFIG.googleScriptUrl}?action=getTodayReceipts`),
+          fetch(`${CONFIG.googleScriptUrl}?action=getClients&day=${encodeURIComponent(selectedDay)}`)
+        ]);
 
-    const [receiptData, clientsData, externalDataRaw] = await Promise.all([
-      receiptResponse.json(),
-      clientsResponse.json(),
-      externalResponse.json()
-    ]);
+        const [receiptData, clientsData] = await Promise.all([
+          receiptResponse.json(),
+          clientsResponse.json()
+        ]);
 
-    // التأكد من وجود بيانات الشيت الخارجي بالشكل المتوقع
-    const externalData = Array.isArray(externalDataRaw.values) ? externalDataRaw.values : externalDataRaw;
-
-    // استخراج أسماء العملاء الذين قبض منهم اليوم
-    const todayClientNames = receiptData.map(entry => entry.client.split('-')[0].trim());
-
-    const clientSelect = document.getElementById('clientSelect');
-    clientSelect.innerHTML = '<option value=""> مشتەری هەڵبژێرە...</option>';
-
-    clientsData.forEach(client => {
-      const nameOnly = client.name.split('-')[0].trim();
-      const option = document.createElement('option');
-      option.value = client.name;
-
-      // علامة ✅ إذا قبض العميل اليوم
-      const hasReceipt = todayClientNames.includes(nameOnly);
-      const receiptMark = hasReceipt ? '✅ ' : '';
-
-      // التحقق من الشيت الخارجي: هل الرقم = 0؟
-      const externalRow = externalData.find(row => row[0]?.trim() === nameOnly);
-      const isZero = externalRow && parseInt(externalRow[1]) === 0;
-
-      option.textContent = receiptMark + client.name;
-      if (isZero) option.style.color = 'red'; // اللون الأحمر إذا الرقم = 0
-
-      clientSelect.appendChild(option);
-    });
-
-  } catch (error) {
-    showMessage('فشل في تحميل قائمة العملاء', 'error');
-    console.error('Error loading clients:', error);
-  }
-}
-
+        const todayClientNames = receiptData.map(entry => entry.client.split('-')[0].trim());
+        const clientSelect = document.getElementById('clientSelect');
+        
+        clientSelect.innerHTML = '<option value=""> مشتەری هەڵبژێرە...</option>';
+        
+        clientsData.forEach(client => {
+          const nameOnly = client.name.split('-')[0].trim();
+          const option = document.createElement('option');
+          option.value = client.name;
+          option.textContent = todayClientNames.includes(nameOnly) ? `✅ ${client.name}` : client.name;
+          clientSelect.appendChild(option);
+        });
+      } catch (error) {
+        showMessage('فشل في تحميل قائمة العملاء', 'error');
+        console.error('Error loading clients:', error);
+      }
+    }
 
     // تحميل سندات اليوم
     async function loadTodayReceipts() {
