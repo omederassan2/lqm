@@ -616,46 +616,43 @@
     // تحميل العملاء
 async function loadClients(selectedDay) {
   try {
-    // تحميل بيانات العملاء وسندات اليوم من السكربت الرئيسي
-    const [receiptResponse, clientsResponse] = await Promise.all([
+    // جلب سندات اليوم وبيانات العملاء من الشيت الأساسي والشيت الخارجي
+    const [receiptResponse, clientsResponse, externalResponse] = await Promise.all([
       fetch(`${CONFIG.googleScriptUrl}?action=getTodayReceipts`),
-      fetch(`${CONFIG.googleScriptUrl}?action=getClients&day=${encodeURIComponent(selectedDay)}`)
+      fetch(`${CONFIG.googleScriptUrl}?action=getClients&day=${encodeURIComponent(selectedDay)}`),
+      fetch('https://script.google.com/macros/s/AKfycbxQwwhYr5ZEBEa5ug6a1YYJLgTB_OGul3smhWcf3yovHx9PhrXlqXKc3y5QP4dpGCbe/exec?action=getExternalClients') // الشيت الخارجي
     ]);
 
-    const [receiptData, clientsData] = await Promise.all([
+    const [receiptData, clientsData, externalDataRaw] = await Promise.all([
       receiptResponse.json(),
-      clientsResponse.json()
+      clientsResponse.json(),
+      externalResponse.json()
     ]);
 
-    // 🔹 تحميل بيانات العملاء من شيت خارجي للتحقق من الرقم بجانب الاسم
-    const statusResponse = await fetch('https://script.google.com/macros/s/AKfycbxQwwhYr5ZEBEa5ug6a1YYJLgTB_OGul3smhWcf3yovHx9PhrXlqXKc3y5QP4dpGCbe/exec');
-    const statusData = await statusResponse.json();
+    // التأكد من وجود بيانات الشيت الخارجي بالشكل المتوقع
+    const externalData = Array.isArray(externalDataRaw.values) ? externalDataRaw.values : externalDataRaw;
 
-    // تحويل بيانات الحالة إلى خريطة: { "اسم العميل": "0" أو "1" }
-    const statusMap = {};
-    statusData.forEach(row => {
-      const name = row[0]?.trim();
-      const value = row[1]?.toString().trim();
-      if (name) statusMap[name] = value;
-    });
-
+    // استخراج أسماء العملاء الذين قبض منهم اليوم
     const todayClientNames = receiptData.map(entry => entry.client.split('-')[0].trim());
+
     const clientSelect = document.getElementById('clientSelect');
-    clientSelect.innerHTML = '<option value="">مشتەری هەڵبژێرە...</option>';
+    clientSelect.innerHTML = '<option value=""> مشتەری هەڵبژێرە...</option>';
 
     clientsData.forEach(client => {
       const nameOnly = client.name.split('-')[0].trim();
       const option = document.createElement('option');
       option.value = client.name;
-      option.textContent = todayClientNames.includes(nameOnly)
-        ? `✅ ${client.name}`
-        : client.name;
 
-      // 🔸 إذا كان الاسم موجود في الجدول الآخر ورقمه 0 → اجعل لونه أحمر
-      if (statusMap[nameOnly] === '0') {
-        option.style.color = 'red';
-        option.textContent = `🚫 ${client.name}`;
-      }
+      // علامة ✅ إذا قبض العميل اليوم
+      const hasReceipt = todayClientNames.includes(nameOnly);
+      const receiptMark = hasReceipt ? '✅ ' : '';
+
+      // التحقق من الشيت الخارجي: هل الرقم = 0؟
+      const externalRow = externalData.find(row => row[0]?.trim() === nameOnly);
+      const isZero = externalRow && parseInt(externalRow[1]) === 0;
+
+      option.textContent = receiptMark + client.name;
+      if (isZero) option.style.color = 'red'; // اللون الأحمر إذا الرقم = 0
 
       clientSelect.appendChild(option);
     });
@@ -665,6 +662,7 @@ async function loadClients(selectedDay) {
     console.error('Error loading clients:', error);
   }
 }
+
 
     // تحميل سندات اليوم
     async function loadTodayReceipts() {
