@@ -538,6 +538,7 @@
   <script>
     // الثوابت والتكوين
     const CONFIG = {
+      externalSheetUrl1: "https://script.google.com/macros/s/AKfycbwkdftH_0szC8lXTUZfXgaYIS2r1yg4t133wkh9zv6Iu6Ih-NRQURqcxutrXBPpRA_C/exec",
       googleScriptUrl: 'https://script.google.com/macros/s/AKfycbyMQJOhNI-NVUJ2S6tO91FrTgdxCAWs1hL02_H2lBm8MWpeoo0S6UbordkwotBjWjRU/exec',
       externalSheetUrl: 'https://script.google.com/macros/s/AKfycbyu5oqMKOAKXK05bYG9pSWhc6HQ1nj5t6eI75AhW7urb0ldyH3H1CFcwFxu9Y637wt2rg/exec',
       exchangeRateUrl: 'https://script.google.com/macros/s/AKfycbzAvk87pUPqPzrnlcyXk7VfaT5Kk4pzeW2M-SD-2XxVhudmNG8vRJ-IgK7hJt89LBif/exec',
@@ -637,12 +638,39 @@
           option.value = client.name;
           option.textContent = todayClientNames.includes(nameOnly) ? `✅ ${client.name}` : client.name;
           clientSelect.appendChild(option);
-        });
+        });await markZeroClients();
       } catch (error) {
         showMessage('فشل في تحميل قائمة العملاء', 'error');
         console.error('Error loading clients:', error);
       }
     }
+// 🔴 دالة لجلب العملاء من الشيت المنفصل ووضع إشارة حمراء بجانب من لديهم القيمة 0
+async function markZeroClients() {
+  try {
+    const response = await fetch(`${CONFIG.externalSheetUrl1}?action=getZeroClients`);
+    const data = await response.json(); // الشكل المتوقع: [{name: "اسم العميل", value: "0"}, ...]
+
+    // استخراج أسماء العملاء الذين لديهم القيمة 0 فقط
+    const zeroClients = data
+      .filter(item => item.value == "0" || item.value == 0)
+      .map(item => item.name.trim());
+
+    const clientSelect = document.getElementById("clientSelect");
+
+    // المرور على القائمة ووضع 🔴 بجانب العملاء الذين لديهم 0
+    for (const option of clientSelect.options) {
+      const nameOnly = option.textContent.replace(/^✅\s*/, '').split('-')[0].trim();
+
+      if (zeroClients.includes(nameOnly)) {
+        option.textContent += " 🔴";
+        option.style.color = "red";
+      }
+    }
+
+  } catch (error) {
+    console.error("❌ خطأ أثناء جلب بيانات العملاء ذوي القيمة 0:", error);
+  }
+}
 
     // تحميل سندات اليوم
     async function loadTodayReceipts() {
